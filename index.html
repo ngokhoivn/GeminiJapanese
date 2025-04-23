@@ -10,7 +10,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -20,23 +20,24 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            overflow-x: hidden;
             width: 100%;
             line-height: 1.5;
             -webkit-text-size-adjust: 100%;
             touch-action: manipulation;
             padding: 0;
+            overflow-x: hidden;
         }
 
         /* Container chính */
         .container {
             max-width: 800px;
-            width: calc(100% - 40px);
-            padding: 20px 0;
+            width: 100%;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             margin: 0 auto;
+            overflow-x: hidden;
         }
 
         /* Các section chung */
@@ -49,17 +50,20 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             width: 100%;
             border: 1px solid #333;
+            overflow-x: hidden;
+            word-wrap: break-word;
         }
 
         /* Tiêu đề */
         h1 {
-            font-size: 1.8rem;
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
             margin: 0 0 15px;
             color: #e0e0e0;
             word-break: break-word;
             text-align: center;
             padding-bottom: 10px;
             border-bottom: 1px solid #333;
+            overflow-wrap: break-word;
         }
 
         h3 {
@@ -75,10 +79,12 @@
             position: relative;
             width: 100%;
             margin-bottom: 15px;
+            max-width: 100%;
         }
 
         textarea {
             width: 100%;
+            max-width: 100%;
             padding: 15px;
             border: 1px solid #444;
             border-radius: 6px;
@@ -90,6 +96,7 @@
             line-height: 1.6;
             touch-action: manipulation;
             transition: border-color 0.2s ease;
+            box-sizing: border-box;
         }
 
         textarea:focus {
@@ -134,6 +141,7 @@
             font-size: 0.85rem;
             width: auto;
             margin: 0;
+            max-width: calc(100% - 30px);
         }
 
         .copy-btn {
@@ -271,22 +279,22 @@
         /* Responsive cho mobile */
         @media (max-width: 600px) {
             body {
-                padding: 10px 0;
+                padding: 10px;
             }
 
             .container {
-                width: calc(100% - 20px);
+                padding: 0;
+                width: 100%;
                 gap: 15px;
-            }
-
-            h1 {
-                font-size: 1.5rem;
             }
 
             .input-section, 
             .result-section, 
             .suggestions-section {
                 padding: 15px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
             }
 
             textarea {
@@ -317,6 +325,13 @@
             .hiragana-text, .vietnamese-text {
                 font-size: 0.95em;
             }
+        }
+
+        /* Đảm bảo hình ảnh và iframe không gây tràn */
+        img, iframe {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
     </style>
 </head>
