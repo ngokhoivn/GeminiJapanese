@@ -2,41 +2,56 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Japanese Translator & Suggestion</title>
     <style>
+        /* Reset và base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            max-width: 100%;
-            margin: 0;
-            padding: 20px;
             background-color: #0d1117;
             color: #c9d1d9;
-            min-height: 100vh; /* Đảm bảo chiều cao tối thiểu */
+            min-height: 100vh;
             display: flex;
             justify-content: center;
+            overflow-x: hidden;
+            width: 100%;
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
         }
 
+        /* Container chính */
         .container {
             max-width: 800px;
             width: 100%;
-            position: relative; /* Cố định container */
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 25px; /* Tăng khoảng cách giữa các section */
+            gap: 25px;
         }
 
-        .input-section, .result-section, .suggestions-section {
+        /* Các section chung */
+        .input-section, 
+        .result-section, 
+        .suggestions-section {
             background-color: #1e1e1e;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            width: 100%;
         }
 
+        /* Tiêu đề */
         h1 {
             font-size: 1.8rem;
             margin: 0 0 15px;
             color: #e0e0e0;
+            word-break: break-word;
         }
 
         h3 {
@@ -45,23 +60,26 @@
             color: #e0e0e0;
         }
 
+        /* Phần nhập liệu */
         .textarea-wrapper {
             position: relative;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         textarea {
             width: 100%;
             padding: 12px;
-            margin-bottom: 10px;
             border: 1px solid #333;
             border-radius: 4px;
-            box-sizing: border-box;
             background-color: #2d2d2d;
             color: #e0e0e0;
             font-size: 1rem;
             resize: vertical;
+            min-height: 120px;
         }
 
+        /* Các nút */
         button {
             background: #4285f4;
             color: white;
@@ -71,16 +89,15 @@
             cursor: pointer;
             font-size: 1rem;
             width: 100%;
-            transition: background 0.2s ease, box-shadow 0.2s ease; /* Chỉ thay đổi màu và bóng */
+            transition: background 0.2s ease;
         }
 
         button:hover {
             background: #3367d6;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Thêm bóng nhẹ */
         }
 
         button:active {
-            background: #2a54b5; /* Màu tối hơn khi nhấn */
+            background: #2a54b5;
         }
 
         .clear-btn {
@@ -101,6 +118,7 @@
             margin-top: 5px;
         }
 
+        /* Loading spinner */
         .loading {
             display: none;
             margin: 10px 0;
@@ -122,6 +140,7 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Kết quả dịch */
         .result {
             padding: 15px;
             background-color: #2d2d2d;
@@ -129,6 +148,7 @@
             border-left: 4px solid #34c759;
         }
 
+        /* Gợi ý */
         .suggestions {
             margin-top: 15px;
         }
@@ -139,21 +159,21 @@
             margin-bottom: 8px;
             border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s ease, box-shadow 0.2s ease; /* Chỉ thay đổi màu và bóng */
+            transition: background 0.2s ease;
+            word-break: break-word;
         }
 
         .suggestion-item:hover {
             background-color: #4d4d4d;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Thêm bóng nhẹ */
         }
 
+        /* Văn bản đa ngôn ngữ */
         .japanese-text {
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 1.2em;
             line-height: 1.8em;
             margin-bottom: 10px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .hiragana-text {
@@ -161,8 +181,7 @@
             line-height: 1.6em;
             margin-bottom: 10px;
             color: #b3b3ff;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .vietnamese-text {
@@ -171,8 +190,7 @@
             padding-left: 10px;
             border-left: 2px solid #34c759;
             margin-bottom: 15px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .translation-pair {
@@ -192,6 +210,7 @@
             font-weight: bold;
         }
 
+        /* Hiệu ứng mở rộng nội dung */
         .content {
             display: -webkit-box;
             -webkit-line-clamp: 3;
@@ -215,29 +234,39 @@
             padding: 5px;
             cursor: pointer;
             font-size: 0.8em;
+            user-select: none;
         }
 
+        /* Responsive cho mobile */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
+                touch-action: pan-y; /* Chỉ cho phép cuộn dọc */
             }
 
             .container {
-                padding: 10px;
+                padding: 0;
+                gap: 15px;
             }
 
             h1 {
                 font-size: 1.5rem;
             }
 
+            .input-section, 
+            .result-section, 
+            .suggestions-section {
+                padding: 15px;
+                border-radius: 6px;
+            }
+
             textarea {
-                padding: 12px;
+                padding: 10px;
                 font-size: 1rem;
             }
 
             button {
-                padding: 12px;
-                font-size: 1rem;
+                padding: 10px;
             }
 
             .japanese-text {
@@ -253,6 +282,13 @@
             .vietnamese-text {
                 font-size: 0.9em;
                 line-height: 1.3em;
+            }
+        }
+
+        /* Ngăn chặn zoom trên mobile */
+        @media (max-width: 480px) {
+            textarea, button, .japanese-text, .vietnamese-text {
+                font-size: 16px !important;
             }
         }
     </style>
@@ -302,6 +338,8 @@
                 }
                 
                 document.getElementById('loading').style.display = 'block';
+                document.getElementById('translationResults').innerHTML = '';
+                document.getElementById('suggestionList').innerHTML = '';
                 
                 try {
                     const promptForTranslation = `Detect the language (Japanese or Vietnamese) of the following text and translate it to both languages. 
@@ -342,7 +380,8 @@
                     
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Có lỗi xảy ra: ' + error.message);
+                    document.getElementById('translationResults').innerHTML = 
+                        '<p class="vietnamese-text">Có lỗi xảy ra khi dịch. Vui lòng thử lại.</p>';
                 } finally {
                     document.getElementById('loading').style.display = 'none';
                 }
@@ -351,13 +390,15 @@
             // Xử lý nút xóa
             document.getElementById('clearBtn').addEventListener('click', () => {
                 document.getElementById('inputText').value = '';
+                document.getElementById('translationResults').innerHTML = '';
+                document.getElementById('suggestionList').innerHTML = '';
             });
             
             // Xử lý chọn gợi ý
             document.getElementById('suggestionList').addEventListener('click', function(e) {
                 if (e.target.classList.contains('suggestion-item')) {
-                    const suggestionText = e.target.textContent;
-                    document.getElementById('inputText').value = suggestionText;
+                    document.getElementById('inputText').value = e.target.textContent;
+                    document.getElementById('inputText').focus();
                 }
             });
         });
@@ -366,7 +407,7 @@
             const textElements = document.querySelectorAll('.japanese-text, .hiragana-text, .vietnamese-text');
             
             textElements.forEach(element => {
-                if (element.scrollHeight > 100) {
+                if (element.scrollHeight > element.clientHeight) {
                     element.classList.add('content');
                     
                     const expandBtn = document.createElement('div');
@@ -384,9 +425,15 @@
             // Xử lý nút sao chép
             document.querySelectorAll('.copy-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(btn.dataset.text);
-                    btn.textContent = 'Đã sao chép!';
-                    setTimeout(() => btn.textContent = 'Sao chép', 2000);
+                    navigator.clipboard.writeText(btn.dataset.text)
+                        .then(() => {
+                            btn.textContent = 'Đã sao chép!';
+                            setTimeout(() => btn.textContent = 'Sao chép', 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy:', err);
+                            btn.textContent = 'Lỗi sao chép';
+                        });
                 });
             });
         }
@@ -398,7 +445,10 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: promptText }] }]
+                    contents: [{ parts: [{ text: promptText }] }],
+                    generationConfig: {
+                        maxOutputTokens: 2000
+                    }
                 })
             });
             
@@ -428,20 +478,29 @@
                 <div class="translation-pair">
                     <div class="lang-label">日本語 (Tiếng Nhật - Kanji):</div>
                     <div class="japanese-text">${japaneseText}</div>
-                    <button class="copy-btn" data-text="${japaneseText}">Sao chép</button>
+                    <button class="copy-btn" data-text="${escapeHtml(japaneseText)}">Sao chép</button>
                     <div class="lang-label">ひらがな (Cách đọc Hiragana):</div>
                     <div class="hiragana-text">${hiraganaText}</div>
-                    <button class="copy-btn" data-text="${hiraganaText}">Sao chép</button>
+                    <button class="copy-btn" data-text="${escapeHtml(hiraganaText)}">Sao chép</button>
                     <div class="lang-label">Tiếng Việt:</div>
                     <div class="vietnamese-text">${vietnameseText}</div>
-                    <button class="copy-btn" data-text="${vietnameseText}">Sao chép</button>
+                    <button class="copy-btn" data-text="${escapeHtml(vietnameseText)}">Sao chép</button>
                 </div>`;
                 
                 return resultHTML;
             } catch (error) {
                 console.error('Error extracting translations:', error);
-                return 'Không thể trích xuất bản dịch. Vui lòng thử lại.';
+                return '<p class="vietnamese-text">Không thể trích xuất bản dịch. Vui lòng thử lại.</p>';
             }
+        }
+        
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
         
         function extractSuggestions(responseData) {
@@ -457,10 +516,18 @@
                     }
                 }
                 
-                return suggestions;
+                return suggestions.length > 0 ? suggestions : [
+                    "Bạn có thể nói thêm về điều đó không?",
+                    "Tôi hiểu rồi, cảm ơn bạn!",
+                    "Bạn có câu hỏi nào khác không?"
+                ];
             } catch (error) {
                 console.error('Error extracting suggestions:', error);
-                return [];
+                return [
+                    "Xin lỗi, không thể tạo gợi ý",
+                    "Vui lòng thử lại",
+                    "Nhập câu hỏi khác của bạn"
+                ];
             }
         }
         
@@ -468,15 +535,12 @@
             const suggestionList = document.getElementById('suggestionList');
             suggestionList.innerHTML = '';
             
-            if (suggestions.length === 0) {
-                suggestionList.innerHTML = '<p>Không có gợi ý nào.</p>';
-                return;
-            }
-            
-            suggestions.forEach(suggestion => {
+            suggestions.forEach((suggestion, index) => {
                 const suggestionElem = document.createElement('div');
                 suggestionElem.classList.add('suggestion-item');
                 suggestionElem.textContent = suggestion;
+                suggestionElem.setAttribute('role', 'button');
+                suggestionElem.setAttribute('aria-label', `Gợi ý ${index + 1}: ${suggestion}`);
                 suggestionList.appendChild(suggestionElem);
             });
         }
