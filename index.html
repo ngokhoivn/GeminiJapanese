@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Translator & Suggestion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #2d2d2d;
+            border-radius: 4px;
+            border-left: 4px solid #4285f4;
+        }
+        .suggestions {
+            margin-top: 20px;
+        }
+        .suggestion-item {
+            background-color: #3d3d3d;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #4d4d4d;
+        }
+        h1 {
+            color: #e0e0e0;
+        }
+        .loading {
+            display: none;
+            margin: 10px 0;
+            color: #999;
+        }
+        .japanese-text {
+            font-size: 1.3em;
+            line-height: 2.5em;
+            margin-bottom: 10px;
+        }
+        .vietnamese-text {
+            font-size: 1em;
+            line-height: 1.5em;
+            padding-left: 10px;
+            border-left: 2px solid #4285f4;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        ruby {
+            font-size: 1em;
+        }
+        rt {
+            font-size: 0.6em;
+            color: #b3b3ff;
+        }
+        .translation-pair {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #444;
+        }
+        .translation-pair:last-child {
+            border-bottom: none;
+        }
+        .lang-label {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Japanese Translator & Suggestion</h1>
+        
+        <div>
+            <p>Nhập văn bản (tiếng Việt hoặc tiếng Nhật):</p>
+            <textarea id="inputText" rows="5" placeholder="Nhập nội dung cần dịch"></textarea>
+            
+            <button id="translateBtn">Dịch & Gợi ý</button>
+            <div id="loading" class="loading">Đang xử lý...</div>
+            
+            <div class="result">
+                <h3>Kết quả dịch:</h3>
+                <div id="translationResults"></div>
+            </div>
+            
+            <div class="suggestions">
+                <h3>Gợi ý câu tiếp theo:</h3>
+                <div id="suggestionList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nhúng trực tiếp API key của bạn ở đây
+        const GEMINI_API_KEY = "AIzaSyDjgTk4uZQUCpFH5Zt8ZgP2CW-jhmkLv8o";
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('translateBtn').addEventListener('click', async function() {
+                const inputText = document.getElementById('inputText').value.trim();
+                
+                if (!inputText) {
+                    alert('Vui lòng nhập văn bản cần dịch');
+                    return;
+                }
+                
+                // Hiển thị trạng thái đang tải
+                document.getElementById('loading').style.display = 'block';
+                
+                try {
+                    // Tự động phát hiện ngôn ngữ và dịch cả hai chiều
+                    const promptForTranslation = `Detect the language (Japanese or Vietnamese) of the following text and translate it to both languages. 
+                    If the text is in Japanese, translate it to Vietnamese.
+                    If the text is in Vietnamese, translate it to Japanese.
+                    
+                    Text to translate: "${inputText}"
+                    
+                    For Japanese text, please provide furigana readings for kanji characters using the following format: 
+                    [kanji]{furigana} for each word with kanji.
+                    
+                    Format your response as:
+                    Detected Language: [Japanese/Vietnamese]
+                    Japanese: [Japanese translation with furigana notation]
+                    Vietnamese: [Vietnamese translation]`;
+                    
+                    // Gọi API để dịch
+                    const translationResponse = await fetchFromGemini(GEMINI_API_KEY, promptForTranslation);
+                    
+                    // Xử lý kết quả dịch
+                    const translationResult = extractBothTranslations(translationResponse);
+                    document.getElementById('translationResults').innerHTML = translationResult;
+                    
+                    // Tạo prompt để gợi ý câu tiếp theo
+                    const promptForSuggestions = `Based on this text and its translation:
+                    
+                    Original: "${inputText}"
+                    Translation results: ${translationResult}
+                    
+                    Suggest 3 possible sentences that the person might want to say next in this conversation.
+                    Keep the suggestions in the same language as the original input.
+                    Make the suggestions short and natural, as if continuing the conversation.
+                    Format each suggestion on a new line with "Suggestion 1:", "Suggestion 2:", etc.`;
+                    
+                    // Gọi API để lấy gợi ý
+                    const suggestionsResponse = await fetchFromGemini(GEMINI_API_KEY, promptForSuggestions);
+                    
+                    // Hiển thị các gợi ý
+                    const suggestions = extractSuggestions(suggestionsResponse);
+                    displaySuggestions(suggestions);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra: ' + error.message);
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            });
+            
+            // Thêm tính năng chọn gợi ý
+            document.getElementById('suggestionList').addEventListener('click', function(e) {
+                if (e.target.classList.contains('suggestion-item')) {
+                    const suggestionText = e.target.textContent;
+                    document.getElementById('inputText').value = suggestionText;
+                }
+            });
+        });
+        
+        async function fetchFromGemini(apiKey, promptText) {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: promptText }] }]
+                }) 
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'API request failed');
+            }
+            
+            const data = await response.json();
+            return data;
+        }
+        
+        function extractBothTranslations(responseData) {
+            try {
+                const text = responseData.candidates[0].content.parts[0].text;
+                
+                // Trích xuất ngôn ngữ đã phát hiện
+                const detectedLanguageMatch = text.match(/Detected Language: (Japanese|Vietnamese)/i);
+                const detectedLanguage = detectedLanguageMatch ? detectedLanguageMatch[1] : 'Unknown';
+                
+                // Trích xuất bản dịch tiếng Nhật
+                const japaneseMatch = text.match(/Japanese: ([\s\S]*?)(?=Vietnamese:|$)/i);
+                let japaneseText = japaneseMatch ? japaneseMatch[1].trim() : '';
+                
+                // Trích xuất bản dịch tiếng Việt
+                const vietnameseMatch = text.match(/Vietnamese: ([\s\S]*?)(?=\n\n|$)/i);
+                let vietnameseText = vietnameseMatch ? vietnameseMatch[1].trim() : '';
+                
+                // Chuyển đổi định dạng [kanji]{furigana} thành thẻ ruby HTML
+                japaneseText = japaneseText.replace(/\[([^\]]+)\]\{([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
+                
+                // Tạo HTML cho kết quả dịch
+                let resultHTML = `
+                <div class="translation-pair">
+                    <div class="lang-label">日本語 (Tiếng Nhật):</div>
+                    <div class="japanese-text">${japaneseText}</div>
+                    <div class="lang-label">Tiếng Việt:</div>
+                    <div class="vietnamese-text">${vietnameseText}</div>
+                </div>`;
+                
+                return resultHTML;
+            } catch (error) {
+                console.error('Error extracting translations:', error);
+                return 'Không thể trích xuất bản dịch. Vui lòng thử lại.';
+            }
+        }
+        
+        function extractSuggestions(responseData) {
+            try {
+                const text = responseData.candidates[0].content.parts[0].text;
+                const suggestions = [];
+                
+                // Extract suggestions using regex
+                const regex = /Suggestion \d+: (.*?)(?:\n|$)/g;
+                let match;
+                
+                while ((match = regex.exec(text)) !== null) {
+                    if (match[1].trim()) {
+                        suggestions.push(match[1].trim());
+                    }
+                }
+                
+                return suggestions;
+            } catch (error) {
+                console.error('Error extracting suggestions:', error);
+                return [];
+            }
+        }
+        
+        function displaySuggestions(suggestions) {
+            const suggestionList = document.getElementById('suggestionList');
+            suggestionList.innerHTML = '';
+            
+            if (suggestions.length === 0) {
+                suggestionList.innerHTML = '<p>Không có gợi ý nào.</p>';
+                return;
+            }
+            
+            suggestions.forEach(suggestion => {
+                const suggestionElem = document.createElement('div');
+                suggestionElem.classList.add('suggestion-item');
+                suggestionElem.textContent = suggestion;
+                suggestionList.appendChild(suggestionElem);
+            });
+        }
+    </script>
+</body>
+</html>
