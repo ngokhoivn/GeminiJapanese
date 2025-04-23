@@ -55,11 +55,11 @@
             background-color: #3d3d3d;
             padding: 10px;
             margin-bottom: 8px;
-            border-radius: 4px;
+            border-radius: 4 4px;
             cursor: pointer;
         }
         .suggestion-item:hover {
-            background-color: #4d4d4d;
+            background-color: #4d4d4p;
         }
         h1 {
             color: #e0e0e0;
@@ -74,12 +74,17 @@
             line-height: 2.5em;
             margin-bottom: 10px;
         }
+        .hiragana-text {
+            font-size: 1.1em;
+            line-height: 2em;
+            margin-bottom: 10px;
+            color: #b3b3ff;
+        }
         .vietnamese-text {
             font-size: 1em;
             line-height: 1.5em;
             padding-left: 10px;
             border-left: 2px solid #4285f4;
-            margin-top: 10px;
             margin-bottom: 15px;
         }
         ruby {
@@ -151,12 +156,15 @@
                     
                     Text to translate: "${inputText}"
                     
-                    For Japanese text, please provide furigana readings for kanji characters using the following format: 
-                    [kanji]{furigana} for each word with kanji.
+                    For Japanese text, please provide:
+                    1. The Japanese text with kanji.
+                    2. The hiragana reading for the entire text.
+                    3. The Vietnamese translation.
                     
                     Format your response as:
                     Detected Language: [Japanese/Vietnamese]
-                    Japanese: [Japanese translation with furigana notation]
+                    Japanese (Kanji): [Japanese text with kanji]
+                    Hiragana: [Hiragana reading]
                     Vietnamese: [Vietnamese translation]`;
                     
                     // Gọi API để dịch
@@ -229,22 +237,25 @@
                 const detectedLanguageMatch = text.match(/Detected Language: (Japanese|Vietnamese)/i);
                 const detectedLanguage = detectedLanguageMatch ? detectedLanguageMatch[1] : 'Unknown';
                 
-                // Trích xuất bản dịch tiếng Nhật
-                const japaneseMatch = text.match(/Japanese: ([\s\S]*?)(?=Vietnamese:|$)/i);
+                // Trích xuất bản dịch tiếng Nhật (Kanji)
+                const japaneseMatch = text.match(/Japanese \(Kanji\): ([\s\S]*?)(?=Hiragana:|$)/i);
                 let japaneseText = japaneseMatch ? japaneseMatch[1].trim() : '';
+                
+                // Trích xuất cách đọc Hiragana
+                const hiraganaMatch = text.match(/Hiragana: ([\s\S]*?)(?=Vietnamese:|$)/i);
+                let hiraganaText = hiraganaMatch ? hiraganaMatch[1].trim() : '';
                 
                 // Trích xuất bản dịch tiếng Việt
                 const vietnameseMatch = text.match(/Vietnamese: ([\s\S]*?)(?=\n\n|$)/i);
                 let vietnameseText = vietnameseMatch ? vietnameseMatch[1].trim() : '';
                 
-                // Chuyển đổi định dạng [kanji]{furigana} thành thẻ ruby HTML
-                japaneseText = japaneseText.replace(/\[([^\]]+)\]\{([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
-                
-                // Tạo HTML cho kết quả dịch
+                // Tạo HTML cho kết quả dịch với 3 hàng
                 let resultHTML = `
                 <div class="translation-pair">
-                    <div class="lang-label">日本語 (Tiếng Nhật):</div>
+                    <div class="lang-label">日本語 (Tiếng Nhật - Kanji):</div>
                     <div class="japanese-text">${japaneseText}</div>
+                    <div class="lang-label">ひらがな (Cách đọc Hiragana):</div>
+                    <div class="hiragana-text">${hiraganaText}</div>
                     <div class="lang-label">Tiếng Việt:</div>
                     <div class="vietnamese-text">${vietnameseText}</div>
                 </div>`;
