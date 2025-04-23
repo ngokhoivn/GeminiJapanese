@@ -12,14 +12,18 @@
             padding: 20px;
             background-color: #0d1117;
             color: #c9d1d9;
+            min-height: 100vh; /* Đảm bảo chiều cao tối thiểu */
+            display: flex;
+            justify-content: center;
         }
 
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            width: 100%;
+            position: relative; /* Cố định container */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px; /* Tăng khoảng cách giữa các section */
         }
 
         .input-section, .result-section, .suggestions-section {
@@ -59,7 +63,7 @@
         }
 
         button {
-            background: #4285f4; /* Màu đơn sắc thay vì gradient */
+            background: #4285f4;
             color: white;
             border: none;
             padding: 12px;
@@ -67,16 +71,16 @@
             cursor: pointer;
             font-size: 1rem;
             width: 100%;
-            transition: transform 0.2s ease, background 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease; /* Chỉ thay đổi màu và bóng */
         }
 
         button:hover {
-            transform: scale(1.02);
-            background: #3367d6; /* Màu hover đơn sắc */
+            background: #3367d6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Thêm bóng nhẹ */
         }
 
         button:active {
-            transform: scale(0.98);
+            background: #2a54b5; /* Màu tối hơn khi nhấn */
         }
 
         .clear-btn {
@@ -135,13 +139,12 @@
             margin-bottom: 8px;
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease; /* Chỉ thay đổi màu và bóng */
         }
 
         .suggestion-item:hover {
             background-color: #4d4d4d;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Thêm bóng nhẹ */
         }
 
         .japanese-text {
